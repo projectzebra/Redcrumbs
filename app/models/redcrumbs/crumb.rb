@@ -8,14 +8,13 @@ require 'dm-redis-adapter'
 
 module Redcrumbs
   class Crumb
-    REDIS = Redis.new
     
     include DataMapper::Resource
     include Crumb::Getters
     include Crumb::Setters
     include Crumb::Expiry
     
-    DataMapper.setup(:default, {:adapter  => "redis"})
+    DataMapper.setup(:default, {:adapter  => "redis", :host => Redcrumbs.redis.client.host, :port => Redcrumbs.redis.client.port, :password => Redcrumbs.redis.client.password})
     
     property :id, Serial
     property :subject_id, Integer, :index => true, :lazy => false
@@ -63,7 +62,7 @@ module Redcrumbs
 
     # Designed to mimic ActiveRecord's count. Probably not performant and only should be used for tests really
     def self.count
-      REDIS.keys("redcrumbs_crumbs:*").size - 8
+      Redcrumbs.redis.keys("redcrumbs_crumbs:*").size - 8
     end
   end
 end
