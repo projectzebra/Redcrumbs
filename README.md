@@ -4,6 +4,8 @@ Fast and unobtrusive activity tracking of ActiveRecord models using Redis and Da
 
 Redcrumbs is designed for high-traffic applications that need to track changes to their tables without making additional writes to the database. It is especially useful where the saved history needs to be expired over time and is not mission critical data. The emphasis is on reducing response times and easing the load on your main database.
 
+Note: Now compatible with Rails 3.1+ only.
+
 User context is built in and fully customisable and this makes Redcrumbs particularly useful for reporting relevant activity to users as it happens in your app.
 
 Redcrumbs is used for the 'News' feature in Project Zebra games but could also be used as the basis of a fast versioning or reporting system.
@@ -137,6 +139,32 @@ end
 
 It's not best practice but since the emphasis is on easing the load on our main database we have bent a few rules in order to reduce the calls on the database to, ideally, zero. In any given app you may be tracking several models and this results in a lot of SQL we could do without.
 
+#### Versions >= 0.3.0
+
+`redcrumbed` accepts a `:store` option to which you can pass a hash of options similar to that of the ActiveRecord `as_json` method. These are attributes of the subject that you'd like to store on the crumb object itself. Use it sparingly if you know that, for example, you are only ever going to really use a couple of attributes of the subject and you want to avoid loading the whole thing from the database.
+
+Examples:
+
+```
+class Venue
+  redcrumbed :only => [:name, :latlng], :store => {:only => [:id, :name]}
+end
+```
+
+```
+class Venue
+  redcrumbed :only => [:name, :latlng], :store => {:except => [:updated_at, :created_at]}
+end
+```
+
+```
+class Venue
+  redcrumbed :only => [:name, :latlng], :store => {:only => [:id, :name], :methods => [:checkins]}
+end
+```
+
+#### Versions  < 0.3.0
+
 `redcrumbed` accepts a `:store` option to which you can pass an array of attributes of the subject that you'd like to store on the crumb object itself. Use it sparingly if you know that, for example, you are only ever going to really use a couple of attributes of the subject and you want to avoid loading the whole thing from the database.
 
 ```
@@ -145,7 +173,13 @@ class Venue
 end
 ```
 
-So now if you call `crumb.subject` instead of loading the Venue from your database it will instantiate a new Venue with the same `id` and `name` attributes. You can always retrieve the original by calling `crumb.full_subject`.
+#### Using the stored object
+
+So now if you call `crumb.subject` instead of loading the Venue from your database it will instantiate a new Venue with the only the attributes you have stored. You can always retrieve the original by calling `crumb.full_subject`.
+
+_ If you plan to use the `methods` option to store data on the Crumb you should only use it to store attr_accessors unless you won't be instantiating the subject itself _
+
+#### Creator and Target storage
 
 As you might expect, you can also do this for the creator and target of the crumb. See the redcrumbs.rb initializer for how to set this as a global configuration.
 
@@ -156,4 +190,4 @@ Lots of refactoring, tests and new features.
 
 ## License
 
-Created by John Hope (c) 2012 for Project Zebra. Released under MIT License (http://www.opensource.org/licenses/mit-license.php).
+Created by John Hope ([@midhir](http://www.twitter.com/midhir)) (c) 2012 for Project Zebra ([@projectzebra](http://www.twitter.com/projectzebra)). Released under MIT License (http://www.opensource.org/licenses/mit-license.php).
