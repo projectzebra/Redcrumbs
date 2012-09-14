@@ -8,13 +8,13 @@ module Redcrumbs
       def prepare_redcrumbed_options(options)
         defaults = {
           :only => [],
-          :store => []
+          :store => {}
         }
         
         options.reverse_merge!(defaults)
         
         options[:only] = Array(options[:only])
-        options[:store] = Array(options[:store])
+        options[:store] = options[:store]
         
         class_attribute :redcrumbs_options
         class_attribute :redcrumbs_callback_options
